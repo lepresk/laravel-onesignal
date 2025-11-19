@@ -4,7 +4,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/lepresk/laravel-onesignal.svg?style=flat-square)](https://packagist.org/packages/lepresk/laravel-onesignal)
 [![License](https://img.shields.io/packagist/l/lepresk/laravel-onesignal.svg?style=flat-square)](https://packagist.org/packages/lepresk/laravel-onesignal)
 
-A professional OneSignal notification channel for Laravel applications. Send push notifications to iOS, Android, and web browsers through OneSignal's API with a clean, fluent interface.
+OneSignal notification channel for Laravel applications. Send push notifications to iOS, Android, and web browsers through OneSignal's API with a clean, fluent interface.
 
 ## Features
 
@@ -87,7 +87,7 @@ class WelcomeNotification extends Notification
 {
     public function via($notifiable): array
     {
-        return ['onesignal'];
+        return ['push'];
     }
 
     public function toPush($notifiable): PushMessage

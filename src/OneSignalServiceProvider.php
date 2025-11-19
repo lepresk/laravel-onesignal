@@ -96,7 +96,7 @@ class OneSignalServiceProvider extends ServiceProvider
     protected function registerNotificationChannel(): void
     {
         Notification::resolved(function (ChannelManager $service) {
-            $service->extend('onesignal', function ($app) {
+            $service->extend('push', function ($app) {
                 return $app->make(PushChannel::class);
             });
         });
