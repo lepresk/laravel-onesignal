@@ -1,0 +1,94 @@
+{
+  "name": "lepresk/laravel-onesignal",
+  "description": "OneSignal push notification channel for Laravel. Send mobile and web push notifications through OneSignal API with support for iOS, Android, and web browsers.",
+  "keywords": [
+    "laravel",
+    "laravel-notification",
+    "laravel-notification-channel",
+    "onesignal",
+    "onesignal-api",
+    "push-notifications",
+    "mobile-notifications",
+    "ios-push-notifications",
+    "android-push-notifications",
+    "web-push",
+    "push-notification-service",
+    "notification-channel",
+    "laravel-package",
+    "php-onesignal",
+    "onesignal-sdk"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "homepage": "https://github.com/lepresk/laravel-onesignal",
+  "support": {
+    "issues": "https://github.com/lepresk/laravel-onesignal/issues",
+    "source": "https://github.com/lepresk/laravel-onesignal"
+  },
+  "authors": [
+    {
+      "name": "lepresk",
+      "email": "lepresk@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.3",
+    "ext-json": "*",
+    "illuminate/contracts": "^11.0|^12.0",
+    "illuminate/support": "^11.0|^12.0",
+    "illuminate/notifications": "^11.0|^12.0",
+    "norkunas/onesignal-php-api": "^2.15",
+    "nyholm/psr7": "^1.8",
+    "symfony/http-client": "^7.1",
+    "psr/log": "^3.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^9.0",
+    "phpunit/phpunit": "^11.0",
+    "mockery/mockery": "^1.6",
+    "larastan/larastan": "^3.0",
+    "laravel/pint": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Lepresk\\LaravelOnesignal\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Lepresk\\LaravelOnesignal\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+    "format": "vendor/bin/pint",
+    "analyse": "vendor/bin/phpstan analyse",
+    "check": [
+      "@format",
+      "@analyse",
+      "@test"
+    ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Lepresk\\LaravelOnesignal\\OneSignalServiceProvider"
+      ],
+      "aliases": {
+        "OneSignal": "Lepresk\\LaravelOnesignal\\Facades\\OneSignal"
+      }
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
