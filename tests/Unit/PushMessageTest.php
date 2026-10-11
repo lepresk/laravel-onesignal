@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Lepresk\LaravelOnesignal\Tests\Unit;
 
 use Lepresk\LaravelOnesignal\PushMessage;
+use OneSignal\Config;
+use OneSignal\Resolver\ResolverFactory;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 
 class PushMessageTest extends TestCase
@@ -26,7 +29,7 @@ class PushMessageTest extends TestCase
         $message = (new PushMessage)
             ->withTitle('Test')
             ->withBody('Test')
-            ->withHightPriority();
+            ->withHighPriority();
 
         $data = $message->build();
 
@@ -42,7 +45,9 @@ class PushMessageTest extends TestCase
 
         $data = $message->build();
 
-        $this->assertEquals([1, 2, 3], $data['include_external_user_ids']);
+        $this->assertSame(['external_id' => ['1', '2', '3']], $data['include_aliases']);
+        $this->assertSame('push', $data['target_channel']);
+        $this->assertArrayNotHasKey('include_external_user_ids', $data);
     }
 
     public function test_it_can_add_custom_data(): void
@@ -160,5 +165,83 @@ class PushMessageTest extends TestCase
         $this->assertEquals('dismiss', $data['buttons'][0]['id']);
         $this->assertEquals('Dismiss', $data['buttons'][0]['text']);
         $this->assertArrayNotHasKey('url', $data['buttons'][0]);
+    }
+
+    public function test_minimal_message_is_accepted_by_onesignal_resolver(): void
+    {
+        $message = (new PushMessage)
+            ->withTitle('Test')
+            ->withBody('Test')
+            ->toUser(1);
+
+        $resolver = (new ResolverFactory(new Config('app-id', 'api-key')))->createNotificationResolver();
+        $resolved = $resolver->resolve($message->build());
+
+        $this->assertSame(['external_id' => ['1']], $resolved['include_aliases']);
+        $this->assertSame('push', $resolved['target_channel']);
+        $this->assertArrayNotHasKey('android_channel_id', $resolved);
+        $this->assertArrayNotHasKey('ttl', $resolved);
+        $this->assertArrayNotHasKey('priority', $resolved);
+    }
+
+    public function test_it_keeps_custom_notification_id(): void
+    {
+        $data = (new PushMessage)
+            ->withBody('Test')
+            ->withNotificationId(42)
+            ->build();
+
+        $this->assertSame(42, $data['data']['notification_id']);
+    }
+
+    public function test_it_defaults_notification_id(): void
+    {
+        $data = (new PushMessage)->withBody('Test')->build();
+
+        $this->assertSame(-1, $data['data']['notification_id']);
+    }
+
+    public function test_build_does_not_mutate_message(): void
+    {
+        $message = (new PushMessage)->withBody('Test');
+
+        $message->build();
+        $message->withType('custom');
+
+        $this->assertSame('custom', $message->build()['data']['type']);
+    }
+
+    public function test_it_accepts_string_external_user_ids(): void
+    {
+        $data = (new PushMessage)
+            ->withBody('Test')
+            ->toUser('user-abc')
+            ->build();
+
+        $this->assertSame(['external_id' => ['user-abc']], $data['include_aliases']);
+    }
+
+    public function test_to_user_appends_external_ids(): void
+    {
+        $data = (new PushMessage)->withBody('Test')->toUser(1)->toUser('two')->build();
+
+        $this->assertSame(['external_id' => ['1', 'two']], $data['include_aliases']);
+    }
+
+    #[IgnoreDeprecations]
+    public function test_with_hight_priority_is_deprecated(): void
+    {
+        $this->expectUserDeprecationMessage('Since lepresk/laravel-onesignal 2.0: "Lepresk\\LaravelOnesignal\\PushMessage::withHightPriority()" is deprecated, use "withHighPriority()" instead.');
+
+        $data = (new PushMessage)->withBody('Test')->withHightPriority()->build();
+
+        $this->assertSame(PushMessage::PRIORITY_HIGH, $data['priority']);
+    }
+
+    public function test_with_high_priority(): void
+    {
+        $data = (new PushMessage)->withBody('Test')->withHighPriority()->build();
+
+        $this->assertSame(PushMessage::PRIORITY_HIGH, $data['priority']);
     }
 }

@@ -63,7 +63,7 @@ class PushMessage implements Arrayable
     private array $attachments;
 
     /**
-     * @var array<int, int> an array of externals userIds
+     * @var array<int, int|string> an array of externals userIds
      */
     private array $externalUserIds;
 
@@ -267,11 +267,21 @@ class PushMessage implements Arrayable
     /**
      * Sets high priority for this notification
      */
-    public function withHightPriority(): self
+    public function withHighPriority(): self
     {
         $this->setPriority(self::PRIORITY_HIGH);
 
         return $this;
+    }
+
+    /**
+     * @deprecated since 2.0, use withHighPriority() instead.
+     */
+    public function withHightPriority(): self
+    {
+        trigger_deprecation('lepresk/laravel-onesignal', '2.0', '"%s()" is deprecated, use "withHighPriority()" instead.', __METHOD__);
+
+        return $this->withHighPriority();
     }
 
     /**
@@ -420,7 +430,7 @@ class PushMessage implements Arrayable
      */
     public function withImage(?string $imageUrl): self
     {
-        if ($imageUrl != null) {
+        if ($imageUrl !== null && $imageUrl !== '') {
             $this->addData('imageUrl', $imageUrl);
             $this->attachments['image'] = $imageUrl;
         }
@@ -501,9 +511,9 @@ class PushMessage implements Arrayable
     /**
      * Set specified $userId as externalUserId target
      *
-     * @param int $oneSignalExternalUserId The id of user to target
+     * @param int|string $oneSignalExternalUserId The id of user to target
      */
-    public function toUser(int $oneSignalExternalUserId): self
+    public function toUser(int|string $oneSignalExternalUserId): self
     {
         $this->externalUserIds[] = $oneSignalExternalUserId;
 
@@ -513,7 +523,7 @@ class PushMessage implements Arrayable
     /**
      * Set specified userIds as notification target
      *
-     * @param array<int, int> $oneSignalExternalUserIds The list of user ids to target
+     * @param array<int, int|string> $oneSignalExternalUserIds The list of user ids to target
      */
     public function toExternalUserIds(array $oneSignalExternalUserIds): self
     {
@@ -534,24 +544,41 @@ class PushMessage implements Arrayable
      */
     public function build(): array
     {
-        if (empty($this->data['notification'])) {
-            $this->withNotificationId(-1);
-        }
+        $payload = $this->data;
+        $payload['notification_id'] ??= -1;
 
-        if (empty($this->data['type'])) {
-            $this->withNotificationType();
+        if (empty($payload['type'])) {
+            $payload['type'] = self::TYPE_NOTIFICATION;
         }
 
         $data = [
             'contents' => $this->contents,
-            'headings' => $this->headings,
-            'data' => $this->data,
-            'ttl' => $this->ttl,
-            'android_channel_id' => $this->androidChannelId,
-            'priority' => $this->priority,
-            'filters' => $this->filters,
-            'buttons' => $this->buttons,
+            'data' => $payload,
         ];
+
+        if (! empty($this->headings)) {
+            $data['headings'] = $this->headings;
+        }
+
+        if ($this->ttl !== null) {
+            $data['ttl'] = $this->ttl;
+        }
+
+        if ($this->androidChannelId !== null && $this->androidChannelId !== '') {
+            $data['android_channel_id'] = $this->androidChannelId;
+        }
+
+        if ($this->priority !== null) {
+            $data['priority'] = $this->priority;
+        }
+
+        if (! empty($this->filters)) {
+            $data['filters'] = $this->filters;
+        }
+
+        if (! empty($this->buttons)) {
+            $data['buttons'] = $this->buttons;
+        }
 
         if ($this->name) {
             $data['name'] = $this->name;
@@ -567,7 +594,10 @@ class PushMessage implements Arrayable
         }
 
         if (! empty($this->externalUserIds)) {
-            $data['include_external_user_ids'] = $this->externalUserIds;
+            $data['include_aliases'] = [
+                'external_id' => array_values(array_map('strval', $this->externalUserIds)),
+            ];
+            $data['target_channel'] = 'push';
         }
 
         if (! empty($this->segments)) {

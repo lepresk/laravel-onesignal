@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lepresk\LaravelOnesignal\Contracts;
 
+use Lepresk\LaravelOnesignal\Exceptions\NotificationFailedException;
 use Lepresk\LaravelOnesignal\PushMessage;
 
 interface OneSignalClientInterface
@@ -11,7 +12,7 @@ interface OneSignalClientInterface
     /**
      * Send a push notification.
      *
-     * @throws \Lepresk\LaravelOnesignal\Exceptions\NotificationFailedException
+     * @throws NotificationFailedException
      */
     public function send(PushMessage $message): NotificationResponseInterface;
 
