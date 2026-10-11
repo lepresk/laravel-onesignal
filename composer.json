@@ -35,17 +35,18 @@
   "require": {
     "php": "^8.3",
     "ext-json": "*",
-    "illuminate/contracts": "^11.0|^12.0",
-    "illuminate/support": "^11.0|^12.0",
-    "illuminate/notifications": "^11.0|^12.0",
-    "norkunas/onesignal-php-api": "^2.15",
+    "illuminate/contracts": "^12.0|^13.0",
+    "illuminate/support": "^12.0|^13.0",
+    "illuminate/notifications": "^12.0|^13.0",
+    "norkunas/onesignal-php-api": "^2.16",
     "nyholm/psr7": "^1.8",
-    "symfony/http-client": "^7.1",
-    "psr/log": "^3.0"
+    "psr/log": "^3.0",
+    "symfony/deprecation-contracts": "^3.0",
+    "symfony/http-client": "^7.1|^8.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^9.0",
-    "phpunit/phpunit": "^11.0",
+    "orchestra/testbench": "^10.0|^11.0",
+    "phpunit/phpunit": "^11.0|^12.0",
     "mockery/mockery": "^1.6",
     "larastan/larastan": "^3.0",
     "laravel/pint": "^1.0"

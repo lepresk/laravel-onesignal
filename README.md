@@ -20,7 +20,7 @@ OneSignal notification channel for Laravel applications. Send push notifications
 ## Requirements
 
 - PHP 8.3 or higher
-- Laravel 11.0 or 12.0
+- Laravel 12.x or 13.x
 - OneSignal account and API credentials
 
 ## Installation
@@ -124,13 +124,13 @@ $message = (new PushMessage())
 $message = (new PushMessage())
     ->withTitle('Urgent!')
     ->withBody('This is urgent')
-    ->withHightPriority();
+    ->withHighPriority();
 ```
 
 #### Targeting Users
 
 ##### External User IDs
-External User IDs are custom identifiers you assign to your users in OneSignal. They map your application's user IDs to OneSignal player IDs, allowing you to send notifications to specific users without tracking OneSignal's internal player IDs.
+External User IDs are custom identifiers you assign to your users in OneSignal (via `OneSignal.login()` in the SDK). They are sent with OneSignal's `include_aliases` (`external_id`) on the `push` channel. They cannot be combined with segments or filters in the same message.
 
 ```php
 // Single user by external user ID
@@ -283,6 +283,10 @@ return [
 ];
 ```
 
+Requests time out after `http.timeout` seconds. Failed requests are retried only when OneSignal did not process them (HTTP 423, 425, 429, 502, 503), so a notification is never sent twice.
+
+Logs never include message contents or recipient identifiers: only the audience size, segment names, notification ID and recipient count.
+
 ## Testing
 
 Run the test suite:
@@ -310,6 +314,20 @@ Run static analysis with PHPStan:
 ```bash
 composer analyse
 ```
+
+## Upgrading to 2.0
+
+- Laravel 11 is no longer supported.
+- External user IDs are sent as `include_aliases.external_id` (strings) with `target_channel: push`, replacing OneSignal's deprecated `include_external_user_ids`. Update `NotificationSending` listeners that read the payload.
+- Combining `toUser()` / `toExternalUserIds()` with segments or tags now throws `InvalidMessageException`.
+
+### Deprecations
+
+| Deprecated | Replacement | Removal |
+|------------|-------------|---------|
+| `PushMessage::withHightPriority()` | `PushMessage::withHighPriority()` | 3.0 |
+
+Deprecated methods trigger an `E_USER_DEPRECATED` notice, which Laravel writes to the log channel set by `LOG_DEPRECATIONS_CHANNEL`.
 
 ## Changelog
 
